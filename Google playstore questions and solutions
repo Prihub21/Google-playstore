@@ -1,0 +1,119 @@
+Q1) Which category has the most apps?
+
+SELECT category , COUNT(app) AS most_apps FROM playstore_data
+GROUP BY category 
+ORDER BY most_apps DESC;
+
+Q2) Which genre has the highest average rating?
+
+SELECT genres, AVG(rating) AS highest_avg_rating FROM playstore_data
+GROUP BY genres
+ORDER BY highest_avg_rating DESC;
+
+Q3) Which app has the highest number of reviews in each category?
+
+WITH ranked_apps AS (
+  SELECT
+    app,
+    category,
+    reviews,
+    ROW_NUMBER() OVER (PARTITION BY category ORDER BY reviews DESC) AS rank
+  FROM playstore_data
+)
+SELECT app, category, reviews
+FROM ranked_apps
+WHERE rank = 1;
+
+Q4)How many free vs. paid apps are there overall and by category?
+
+SELECT category,type,COUNT(*) AS number_of_app FROM playstore_data
+GROUP BY category, type
+ORDER BY category, type;
+
+Q5) What is the average app size per genre?
+
+SELECT genres, AVG(size) AS avg_app_size FROM playstore_data
+GROUP BY genres;
+
+Q6) What are the top 10 most installed apps?
+
+SELECT app, installs FROM playstore_data
+GROUP BY app , installs
+ORDER BY installs DESC
+LIMIT 10;
+
+Q7) Which content rating has the most apps?
+
+SELECT content_rating, COUNT(app) AS most_apps FROM playstore_data
+GROUP BY content_rating
+ORDER BY most_apps DESC;
+
+Q8) Do paid apps have higher ratings than free apps?
+
+SELECT type,ROUND(AVG(rating), 2) AS avg_rating FROM playstore_data
+WHERE rating IS NOT NULL
+GROUP BY type;
+
+Q9) Do apps with more reviews also have higher installs?
+
+SELECT app, reviews, installs FROM playstore_data
+GROUP BY app, reviews,installs
+ORDER BY reviews DESC
+LIMIT 30;
+
+Q10) What is the average price of paid apps by category?
+
+SELECT category, type,AVG(price) FROM playstore_data
+WHERE type ='Paid'
+GROUP BY category,type;
+
+Q11) Which paid apps have the highest installs (revenue insight)?
+
+SELECT app,type, installs,(price*installs) AS revenue_insight FROM playstore_data
+WHERE type = 'Paid'
+ORDER By installs DESC
+LIMIT 10;
+
+Q12) What are the most common genres for Teen-rated apps?
+
+SELECT genres,COUNT(*) AS app_count FROM playstore_data
+WHERE content_rating = 'Teen'
+GROUP BY genres
+ORDER BY app_count DESC
+LIMIT 10;
+
+Q13) Are certain content ratings correlated with higher/lower ratings?
+
+SELECT content_rating, AVG(rating) AS ratings FROM playstore_data
+GROUP BY content_rating;
+
+Q14) Which content rating has the highest average number of installs?
+
+SELECT content_rating,COUNT(*) AS app_count,AVG(installs) AS average_installs FROM  playstore_data
+WHERE installs IS NOT NULL
+GROUP BY content_rating
+ORDER BY average_installs DESC;
+
+Q15) Are there apps with a very high number of installs but low ratings?
+
+SELECT app, installs, rating FROM playstore_data
+WHERE rating < '3'
+ORDER BY installs DESC
+LIMIT 10;
+
+Q16) Which apps have very high reviews but low installs?
+
+SELECT app, reviews, installs FROM playstore_data
+WHERE installs <= '1000000' AND reviews >= '100000'
+ORDER BY reviews DESC;
+
+Q17) Which apps haven't been updated in over a year?
+
+SELECT app, last_updated FROM playstore_data
+WHERE last_updated NOT BETWEEN '2017-08-08'AND '2018-08-08';
+
+Q18) What’s the average time since the last update per category?
+
+SELECT category,AVG('2018-08-08' - last_updated) AS avg_days_since_update
+FROM playstore_data
+GROUP BY category;
